@@ -1,13 +1,18 @@
+## Copyright © 2020, Oracle and/or its affiliates. 
+## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
+
 variable "region" {}
 variable "tenancy_ocid" {}
+variable "compartment_ocid" {}
 variable "user_ocid" {}
 variable "fingerprint" {}
 variable "private_key_path" {}
-variable "private_key_oci" {}
-variable "public_key_oci" {}
 
-variable "compartment" {
-  default = "ocid1.compartment.oc1..aaaaaaaacrwyqytswze7bdtkh2hex7wylahjvg45o5lbaufbtub5k3mrcika"
+variable "availablity_domain_name" {}
+
+variable "release" {
+  description = "Reference Architecture Release (OCI Architecture Center)"
+  default     = "1.0"
 }
 
 variable "project_display_name" {
@@ -21,23 +26,29 @@ variable "VCN-CIDR" {
 variable "Subnet-CIDR" {
   default = "10.0.1.0/24"
 }
-variable "ADs" {
-  default = "GrCh:US-ASHBURN-AD-2"
-}
 
-variable "shape" {
- default = "VM.Standard.E2.2"
-}
-variable "image" {
- default = "ocid1.image.oc1.iad.aaaaaaaaw2wavtqrd3ynbrzabcnrs77pinccp55j2gqitjrrj2vf65sqj5kq"
+variable "Shape" {
+  default = "VM.Standard.E2.2"
 }
 
 variable "FlexShapeOCPUS" {
-    default = 1
+  default = 1
 }
 
 variable "FlexShapeMemory" {
-    default = 1
+  default = 1
+}
+
+variable "lb_shape" {
+  default = "flexible"
+}
+
+variable "flex_lb_min_shape" {
+  default = "10"
+}
+
+variable "flex_lb_max_shape" {
+  default = "100"
 }
 
 variable "instance_os" {
@@ -49,28 +60,12 @@ variable "linux_os_version" {
 }
 
 variable "service_ports" {
-  default = [80,443,22]
+  default = [80, 443, 22]
 }
+
 variable "ssh_public_key" {
   default = ""
 }
-variable "ssh_authorized_keys" {
-  default = "/home/opc/.ssh/id_rsa.pub"
-}
-
-# Dictionary Locals
-locals {
-  compute_flexible_shapes = [
-    "VM.Standard.E3.Flex",
-    "VM.Standard.E4.Flex"
-  ]
-}
-
-# Checks if is using Flexible Compute Shapes
-#locals {
-#  is_flexible_shape = contains(local.compute_flexible_shapes, var.Shape)
-#}
-
 
 variable "autonomous_database_admin_password" {
   default = "C0nstellat10n"
@@ -96,15 +91,15 @@ variable "autonomous_database_display_name" {
   default = "DataScience ADW DB"
 }
 
-variable "autonomous_database_is_auto_scaling_enabled" { 
-  default = false 
+variable "autonomous_database_is_auto_scaling_enabled" {
+  default = false
 }
 
 variable "autonomous_database_license_model" {
   default = "BRING_YOUR_OWN_LICENSE"
 }
 
-variable "autonomous_database_whitelisted_ips" { 
+variable "autonomous_database_whitelisted_ips" {
   type    = list(string)
   default = [""]
 }
@@ -125,7 +120,7 @@ variable "analytics_instance_name" {
 }
 
 variable "analytics_instance_idcs_access_token" {
-#  default = "3aNPS[D.1#.rF90qo}me"
+  #  default = "3aNPS[D.1#.rF90qo}me"
   default = "ocid1.credential.oc1..aaaaaaaas4ejrzeajm67apayvynp7poqdcrvdz76fkhmriw37gyi5qjv6wza"
 }
 
@@ -141,4 +136,20 @@ variable "analytics_instance_capacity_capacity_value" {
 
 variable "catalog_display_name" {
   default = "DS_DataCatalog"
+}
+
+# Dictionary Locals
+locals {
+  compute_flexible_shapes = [
+    "VM.Standard.E3.Flex",
+    "VM.Standard.E4.Flex",
+    "VM.Standard.A1.Flex",
+    "VM.Optimized3.Flex"
+  ]
+}
+
+# Checks if is using Flexible Compute Shapes
+locals {
+  is_flexible_shape    = contains(local.compute_flexible_shapes, var.Shape)
+  is_flexible_lb_shape = var.lb_shape == "flexible" ? true : false
 }
