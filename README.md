@@ -37,8 +37,8 @@ If you don't have the required permissions and quota, contact your tenancy admin
 ### Clone the Module
 Now, you'll want a local copy of this repo. You can make that with the commands:
 
-    git clone https://github.com/oracle-quickstart/oci-arch-data-science
-    cd oci-arch-data-science
+    git clone https://github.com/oracle-quickstart/oci-arch-data-science-health-care
+    cd oci-arch-data-science-health-care
     ls
 
 ### Prerequisites
