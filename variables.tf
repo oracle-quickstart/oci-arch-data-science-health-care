@@ -28,7 +28,7 @@ variable "Subnet-CIDR" {
 }
 
 variable "Shape" {
-  default = "VM.Standard.E2.2"
+  default = "VM.Standard.E3.Flex"
 }
 
 variable "FlexShapeOCPUS" {
@@ -68,7 +68,7 @@ variable "ssh_public_key" {
 }
 
 variable "autonomous_database_admin_password" {
-  default = "C0nstellat10n"
+  default = ""
 }
 
 variable "autonomous_database_cpu_core_count" {
@@ -104,9 +104,6 @@ variable "autonomous_database_whitelisted_ips" {
   default = [""]
 }
 
-#-------------
-
-
 variable "analytics_instance_feature_set" {
   default = "ENTERPRISE_ANALYTICS"
 }
@@ -120,8 +117,7 @@ variable "analytics_instance_name" {
 }
 
 variable "analytics_instance_idcs_access_token" {
-  #  default = "3aNPS[D.1#.rF90qo}me"
-  default = "ocid1.credential.oc1..aaaaaaaas4ejrzeajm67apayvynp7poqdcrvdz76fkhmriw37gyi5qjv6wza"
+  default = ""
 }
 
 variable "analytics_instance_capacity_capacity_type" {

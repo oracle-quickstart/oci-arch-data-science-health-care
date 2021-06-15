@@ -89,5 +89,5 @@ When you no longer need the deployment, you can run this command to destroy the 
 
 ## Architecture Diagram
 
-![](./images/adb-ml.PNG)
+![](./images/oci-arch-data-science-health-care.png)
 
