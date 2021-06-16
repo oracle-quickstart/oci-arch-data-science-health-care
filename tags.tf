@@ -9,7 +9,7 @@ resource "oci_identity_tag_namespace" "ArchitectureCenterTagNamespace" {
   provider       = oci.homeregion
   compartment_id = var.compartment_ocid
   description    = "ArchitectureCenterTagNamespace"
-  name           = "ArchitectureCenter\\data-science-health-care-${random_id.tag.hex}"
+  name           = "ArchitectureCenter\\data-science-use-cases-${random_id.tag.hex}"
 
   provisioner "local-exec" {
     command = "sleep 10"

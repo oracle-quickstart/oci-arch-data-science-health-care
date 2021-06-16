@@ -16,7 +16,11 @@ variable "release" {
 }
 
 variable "project_display_name" {
-  default = "MyDataScience1"
+  default = "MyDataScienceProject"
+}
+
+variable "notebook_session_display_name" {
+  default = "MyDataScienceNotebookSession"
 }
 
 variable "VCN-CIDR" {
@@ -72,15 +76,15 @@ variable "autonomous_database_admin_password" {
 }
 
 variable "autonomous_database_cpu_core_count" {
-  default = "1"
+  default = 1
 }
 
 variable "autonomous_database_data_storage_size_in_tbs" {
-  default = "1"
+  default = 1
 }
 
 variable "autonomous_database_db_name" {
-  default = "DataSciencedb"
+  default = "DataScienceDB"
 }
 
 variable "autonomous_database_db_version" {

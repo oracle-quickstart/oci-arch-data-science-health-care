@@ -9,6 +9,7 @@ resource "oci_datascience_project" "ds_project" {
 
 resource "oci_datascience_notebook_session" "ds_notebook_session" {
   compartment_id = var.compartment_ocid
+  display_name   = var.notebook_session_display_name
 
   notebook_session_configuration_details {
     shape     = var.Shape

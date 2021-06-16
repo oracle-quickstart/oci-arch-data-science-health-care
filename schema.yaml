@@ -1,8 +1,8 @@
 ## Copyright © 2020, Oracle and/or its affiliates. 
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
-title: "Set up a data science environment that uses Oracle Machine Learning in Oracle Cloud Infrastructure"
-stackDescription: "Deploy data science environment that uses Autonomous Data Warehouse (ADW), Oracle Analytics Cloud (OAC) and Data Catalog (ODC) in Oracle Cloud Infrastructure."
+title: "Data Science Service: Health care use cases."
+stackDescription: "Data Science Service: Health care use cases."
 schemaVersion: 1.1.0
 version: "20190404"
 locale: "en"
@@ -77,6 +77,14 @@ variableGroups:
         - show_advanced
   variables: 
   - catalog_display_name
+
+- title: DataScience Optional Configuration
+  visible: 
+      and:
+        - show_advanced
+  variables: 
+  - project_display_name
+  - notebook_session_display_name
 
 variables:
 
@@ -368,10 +376,27 @@ variables:
     title: "OAC instance name"
     description: "Oracle Analytics Cloud (OAC) instance name"
 
+  project_display_name:
+    type: string
+    default: "MyDataScienceProject"
+    visible: true
+    required: false
+    title: "OCI DataScience Project Display Name"
+    description: "Choose OCI DataScience Project Display Name"
+
+  notebook_session_display_name:
+    type: string
+    default: "MyDataScienceNotebookSession"
+    visible: true
+    required: false
+    title: "OCI DataScience Notebook Session Display Name"
+    description: "Choose OCI DataScience Notebook Session Display Name"
+
   release:
     type: string
     required: false
     visible: false
     title: "Reference Architecture Release (OCI Architecture Center)"
+
 
 

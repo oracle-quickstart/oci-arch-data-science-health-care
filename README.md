@@ -1,14 +1,18 @@
 # oci-arch-data-science-health-care
 
-Oracle Machine Learning is embedded in both Oracle Autonomous Data Warehouse and Oracle Autonomous Transaction Processing. Because the machine learning algorithms are resident in the database, data scientists can avoid the time, effort, and expense of moving the data to external systems for analysis and model building, scoring, and deployment.
+Oracle Cloud Infrastructure Data Science (OCI) Data Science is a fully managed, serverless platform for data science teams to build, train, and manage machine learning models.
 
-For details of the architecture, see [_Set up a data science environment that uses Oracle Machine Learning_](https://docs.oracle.com/en/solutions/data-science-environment/index.html)
+This flexible architecture supports multiple scenarios across integrated health networks based on Oracle Machine Learning service, combining Autonomous Data Warehouse and Data Science platforms.
+
+In addition to Data Science and Autonomous Data Warehouse, this architecture also uses Data Catalog, Oracle APEX Application Development, and Oracle Analytics Cloud. It also uses OCI Compute instances to host applications that can dynamically stream wearable device data to either Autonomous Data Warehouse or Object Storage. This architecture serves multiple purposes, including storing important data in secure, reliable, and quick-retrieval storage, and building and deploying the applications and machine learning modules in short periods of time.
+
+For details of the architecture, see [_Data Science Service: Health care use cases_](https://docs.oracle.com/en/solutions/data-science-use-cases/index.html)
 
 ## Prerequisites
 
 - Permission to `manage` the following types of resources in your Oracle Cloud Infrastructure tenancy: `vcns`, `internet-gateways`, `route-tables`, `security-lists`, `subnets`, `autonomous-database-family`, and `instances`.
 
-- Quota to create the following resources: 1 VCN, 1 subnet, 1 Internet Gateway, 1 route rules, 1 DRG, 1 ADW database instance, 1 DataCatalog instance, 1 Oracle Analytics Cloud (OAC) instance, and 3 compute instances (User Application VMs).
+- Quota to create the following resources: 1 VCN, 2 subnets, 1 Internet Gateway, 1 NAT Gateway, 2 route rules, 1 DRG, 1 Load Balancer, 1 ADW database instance, 1 DataCatalog instance, 1 DataScience Instance, 1 ObjectStorage Bucket, 1 Oracle Analytics Cloud (OAC) instance, and 4 compute instances (User Application VMs and Bastion VM).
 
 If you don't have the required permissions and quota, contact your tenancy administrator. See [Policy Reference](https://docs.cloud.oracle.com/en-us/iaas/Content/Identity/Reference/policyreference.htm), [Service Limits](https://docs.cloud.oracle.com/en-us/iaas/Content/General/Concepts/servicelimits.htm), [Compartment Quotas](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcequotas.htm).
 
