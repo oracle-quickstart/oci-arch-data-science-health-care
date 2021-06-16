@@ -12,6 +12,8 @@ resource "oci_database_autonomous_database" "ds_autonomous_db" {
   display_name             = var.autonomous_database_display_name
   is_auto_scaling_enabled  = var.autonomous_database_is_auto_scaling_enabled
   license_model            = var.autonomous_database_license_model
-  whitelisted_ips          = var.autonomous_database_whitelisted_ips
+  nsg_ids                  = var.autonomous_database_private_endpoint ? [oci_core_network_security_group.ADWSecurityGroup.id] : null
+  private_endpoint_label   = var.autonomous_database_private_endpoint ? var.autonomous_database_private_endpoint_label : null
+  subnet_id                = var.autonomous_database_private_endpoint ? oci_core_subnet.datas_subnet_private.id : null
   defined_tags             = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }

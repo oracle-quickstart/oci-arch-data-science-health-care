@@ -12,8 +12,17 @@ resource "oci_datascience_notebook_session" "ds_notebook_session" {
   display_name   = var.notebook_session_display_name
 
   notebook_session_configuration_details {
-    shape     = var.Shape
-    subnet_id = oci_core_subnet.datas_subnet.id
+    shape = var.DSNotebookShape
+
+    dynamic "notebook_session_shape_config_details" {
+      for_each = local.is_dsnotebook_flexible_shape ? [1] : []
+      content {
+        memory_in_gbs = var.DSNotebookFlexShapeMemory
+        ocpus         = var.DSNotebookFlexShapeOCPUS
+      }
+    }
+
+    subnet_id = oci_core_subnet.datas_subnet_private.id
   }
 
   project_id   = oci_datascience_project.ds_project.id

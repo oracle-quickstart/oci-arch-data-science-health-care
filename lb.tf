@@ -14,9 +14,10 @@ resource "oci_load_balancer" "datas_lb1" {
 
   compartment_id = var.compartment_ocid
   subnet_ids = [
-    oci_core_subnet.datas_subnet.id
+    oci_core_subnet.datas_subnet_public.id
   ]
-  display_name = "DataScience LB"
+  network_security_group_ids = [oci_core_network_security_group.LBSecurityGroup.id]
+  display_name               = "DataScience LB"
 
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
@@ -43,9 +44,10 @@ resource "oci_load_balancer_listener" "datas_lb_Listener" {
 }
 
 resource "oci_load_balancer_backend" "datas_lb1_Backend" {
+  count            = var.NumberOfAppVMs
   load_balancer_id = oci_load_balancer.datas_lb1.id
   backendset_name  = oci_load_balancer_backendset.datas_lb1_Backendset.name
-  ip_address       = oci_core_instance.datas_instance1.private_ip
+  ip_address       = oci_core_instance.datas_instance[count.index].private_ip
   port             = 80
   backup           = false
   drain            = false
@@ -53,13 +55,4 @@ resource "oci_load_balancer_backend" "datas_lb1_Backend" {
   weight           = 1
 }
 
-resource "oci_load_balancer_backend" "datas_lb1_Backend2" {
-  load_balancer_id = oci_load_balancer.datas_lb1.id
-  backendset_name  = oci_load_balancer_backendset.datas_lb1_Backendset.name
-  ip_address       = oci_core_instance.datas_instance2.private_ip
-  port             = 80
-  backup           = false
-  drain            = false
-  offline          = false
-  weight           = 1
-}
+

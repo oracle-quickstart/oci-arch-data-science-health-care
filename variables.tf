@@ -4,31 +4,55 @@
 variable "region" {}
 variable "tenancy_ocid" {}
 variable "compartment_ocid" {}
-variable "user_ocid" {}
-variable "fingerprint" {}
-variable "private_key_path" {}
+#variable "user_ocid" {}
+#variable "fingerprint" {}
+#variable "private_key_path" {}
 
 variable "availablity_domain_name" {}
+
+variable "use_bastion_service" {
+  default = false
+}
 
 variable "release" {
   description = "Reference Architecture Release (OCI Architecture Center)"
   default     = "1.0"
 }
 
+variable "NumberOfAppVMs" {
+  default = 3
+}
+
 variable "project_display_name" {
-  default = "MyDataScienceProject"
+  default = "DataScienceProject"
 }
 
 variable "notebook_session_display_name" {
-  default = "MyDataScienceNotebookSession"
+  default = "DataScienceNotebookSession"
+}
+
+variable "datas_drg_display_name" {
+  default = "DataScienceDRG"
+}
+
+variable "datas_drg_attachment_display_name" {
+  default = "DataScience_DRG_Attachment"
+}
+
+variable "datas_vcn_display_name" {
+  default = "DataScienceVCN"
 }
 
 variable "VCN-CIDR" {
   default = "10.0.0.0/16"
 }
 
-variable "Subnet-CIDR" {
+variable "Public_Subnet-CIDR" {
   default = "10.0.1.0/24"
+}
+
+variable "Private_Subnet-CIDR" {
+  default = "10.0.2.0/24"
 }
 
 variable "Shape" {
@@ -40,7 +64,31 @@ variable "FlexShapeOCPUS" {
 }
 
 variable "FlexShapeMemory" {
+  default = 10
+}
+
+variable "BastionShape" {
+  default = "VM.Standard.E3.Flex"
+}
+
+variable "BastionFlexShapeOCPUS" {
   default = 1
+}
+
+variable "BastionFlexShapeMemory" {
+  default = 1
+}
+
+variable "DSNotebookShape" {
+  default = "VM.Standard.E3.Flex"
+}
+
+variable "DSNotebookFlexShapeOCPUS" {
+  default = 1
+}
+
+variable "DSNotebookFlexShapeMemory" {
+  default = 20
 }
 
 variable "lb_shape" {
@@ -71,6 +119,14 @@ variable "ssh_public_key" {
   default = ""
 }
 
+variable "autonomous_database_private_endpoint" {
+  default = false
+}
+
+variable "autonomous_database_private_endpoint_label" {
+  default = "ADWPrivateEndpoint"
+}
+
 variable "autonomous_database_admin_password" {
   default = ""
 }
@@ -84,7 +140,7 @@ variable "autonomous_database_data_storage_size_in_tbs" {
 }
 
 variable "autonomous_database_db_name" {
-  default = "DataScienceDB"
+  default = "DSDB"
 }
 
 variable "autonomous_database_db_version" {
@@ -92,7 +148,7 @@ variable "autonomous_database_db_version" {
 }
 
 variable "autonomous_database_display_name" {
-  default = "DataScience ADW DB"
+  default = "DataScienceADWDB"
 }
 
 variable "autonomous_database_is_auto_scaling_enabled" {
@@ -101,11 +157,6 @@ variable "autonomous_database_is_auto_scaling_enabled" {
 
 variable "autonomous_database_license_model" {
   default = "BRING_YOUR_OWN_LICENSE"
-}
-
-variable "autonomous_database_whitelisted_ips" {
-  type    = list(string)
-  default = [""]
 }
 
 variable "analytics_instance_feature_set" {
@@ -117,7 +168,7 @@ variable "analytics_instance_license_type" {
 }
 
 variable "analytics_instance_name" {
-  default = "DSC1"
+  default = "DSOAC1"
 }
 
 variable "analytics_instance_idcs_access_token" {
@@ -135,7 +186,7 @@ variable "analytics_instance_capacity_capacity_value" {
 #------------------
 
 variable "catalog_display_name" {
-  default = "DS_DataCatalog"
+  default = "DSDataCatalog"
 }
 
 # Dictionary Locals
@@ -150,6 +201,8 @@ locals {
 
 # Checks if is using Flexible Compute Shapes
 locals {
-  is_flexible_shape    = contains(local.compute_flexible_shapes, var.Shape)
-  is_flexible_lb_shape = var.lb_shape == "flexible" ? true : false
+  is_flexible_shape            = contains(local.compute_flexible_shapes, var.Shape)
+  is_bastion_flexible_shape    = contains(local.compute_flexible_shapes, var.BastionShape)
+  is_dsnotebook_flexible_shape = contains(local.compute_flexible_shapes, var.DSNotebookShape)
+  is_flexible_lb_shape         = var.lb_shape == "flexible" ? true : false
 }

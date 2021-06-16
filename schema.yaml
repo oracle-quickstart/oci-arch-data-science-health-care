@@ -14,14 +14,19 @@ variableGroups:
   - tenancy_ocid
   - region
   - release
+  - datas_drg_attachment_display_name
+  - service_ports
 
 - title: Required Configuration
   visible: true  
   variables:
   - compartment_ocid
   - availablity_domain_name
+  - NumberOfAppVMs
+  - autonomous_database_private_endpoint
   - autonomous_database_admin_password
   - analytics_instance_idcs_access_token
+  - use_bastion_service
   - show_advanced 
 
 - title: Networking Optional Configuration
@@ -29,8 +34,20 @@ variableGroups:
       and:
         - show_advanced
   variables:  
-  - vcn_cidr
-  - subnet_cidr
+  - datas_vcn_display_name
+  - VCN-CIDR
+  - Public_Subnet-CIDR
+  - Private_Subnet-CIDR
+  - datas_drg_display_name
+
+- title: Load Balancer Optional Configuration
+  visible: 
+      and:
+        - show_advanced
+  variables:
+  - lb_shape
+  - flex_lb_min_shape
+  - flex_lb_max_shape 
 
 - title: Compute Optional Configuration
   visible: 
@@ -38,11 +55,14 @@ variableGroups:
         - show_advanced
   variables: 
   - ssh_public_key 
-  - instance_shape
-  - instance_shape_flex_ocpus
-  - instance_shape_flex_memory
   - instance_os
   - linux_os_version
+  - Shape
+  - FlexShapeOCPUS
+  - FlexShapeMemory
+  - BastionShape
+  - BastionFlexShapeOCPUS
+  - BastionFlexShapeMemory
 
 - title: Autonomous Optional Configuration
   visible: 
@@ -58,7 +78,7 @@ variableGroups:
   - autonomous_database_db_workload
   - autonomous_database_license_model
   - autonomous_database_data_safe_status
-  - autonomous_database_whitelisted_ips
+  - autonomous_database_private_endpoint_label
 
 - title: OAC Optional Configuration
   visible: 
@@ -85,6 +105,9 @@ variableGroups:
   variables: 
   - project_display_name
   - notebook_session_display_name
+  - DSNotebookShape
+  - DSNotebookFlexShapeOCPUS
+  - DSNotebookFlexShapeMemory
 
 variables:
 
@@ -119,6 +142,34 @@ variables:
       regionName: ${region}
       compartmentId: ${compartment_ocid}
 
+  NumberOfAppVMs:
+    type: number
+    required: false
+    minimum: 1
+    maximum: 128
+    multipleOf: 1
+    default: 3
+    title: "How many Application VMs"
+    description: "Choose number of Application VMs to be deployed."
+
+  autonomous_database_private_endpoint:
+    type: boolean
+    visibile: true
+    default: false
+    required: true
+    title: "ADW Database Private Endpoint"
+    description: "Check the box to deploy ADW Database with Private Endpoint."
+
+  autonomous_database_private_endpoint_label:
+    type: string
+    required: false
+    visible: 
+      and:
+        - autonomous_database_private_endpoint
+    default: "ADWPrivateEndpoint"
+    title: "ADW Database Private Endpoint Label"
+    description: "Choose ADW Database Private Endpoint label."
+
   autonomous_database_admin_password:
     type: password
     required: true
@@ -134,9 +185,25 @@ variables:
     title: "IDCS Acccess Token for OAC"
     description: "IDCS Acccess Token required by Oracle Analytics Cloud (OAC)."
 
+  use_bastion_service:
+    type: boolean
+    visibile: true
+    default: false
+    required: false
+    title: "Use OCI Bastion Service"
+    description: "Check the box to use OCI Bastion Service instead of Bastion Host VM."
+
   # Optional Configuration
 
-  vcn_cidr:  
+  datas_vcn_display_name: 
+    type: string
+    default: "DataScienceVCN"
+    visible: true
+    required: false
+    title: "VCN Display Name"
+    description: "Choose VCN Display Name"
+
+  VCN-CIDR:  
     type: string
     required: false
     default: "10.0.0.0/16"
@@ -144,13 +211,29 @@ variables:
     title: "VCN CIDR"
     description: "VCN CIDR block where you want to create the solution resources."
 
-  subnet_cidr:  
+  Public_Subnet-CIDR:  
     type: string
     required: false
-    default: "10.0.0.0/24"
+    default: "10.0.1.0/24"
     pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
-    title: "Subnet CIDR"
+    title: "Public Subnet CIDR"
     description: "Subnet CIDR block where you want to create the solution resources."
+
+  Private_Subnet-CIDR:  
+    type: string
+    required: false
+    default: "10.0.2.0/24"
+    pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
+    title: "Private Subnet CIDR"
+    description: "Subnet CIDR block where you want to create the solution resources."
+
+  datas_drg_display_name:
+    type: string
+    default: "DataScience_DRG"
+    visible: true
+    required: false
+    title: "DRG Display Name"
+    description: "Choose DRG Display Name"
 
   ssh_public_key:
     type: oci:core:ssh:publickey
@@ -158,7 +241,57 @@ variables:
     description: "Choose public SSH Key to be uploaded into compute instances."
     required: false
 
-  instance_shape:
+  lb_shape:
+    type: enum
+    title: "Load Balancer Shape"
+    description: "Load Balancer Shape"
+    default: "flexible"
+    required: false 
+    enum:
+      - "flexible"
+      - "100Mbps"
+      - "10Mbps"
+      - "10Mbps-Micro"
+      - "400Mbps"
+      - "8000Mbps"
+
+  flex_lb_min_shape:
+    type: enum
+    required: false
+    default: "10"
+    title: "LB Flex Min Shape"
+    description: "Choose Minimum Shape for Flex Load Balancer."
+    enum:
+      - "10"
+      - "100"
+      - "1000"
+      - "400"
+      - "8000"
+    visible:
+      and:
+        - eq:
+          - lb_shape 
+          - "flexible"
+
+    flex_lb_max_shape:
+      type: enum
+      required: false
+      default: "100"
+      title: "LB Flex Max Shape"
+      description: "Choose Maximum Shape for Flex Load Balancer."
+      enum:
+        - "10"
+        - "100"
+        - "1000"
+        - "400"
+        - "8000"
+      visible:
+        and:
+          - eq:
+            - lb_shape 
+            - "flexible"
+
+  Shape:
     type: oci:core:instanceshape:name
     required: false
     visible: true
@@ -168,7 +301,7 @@ variables:
     dependsOn:
       compartmentId: ${compartment_ocid}
 
-  instance_shape_flex_ocpus:
+  FlexShapeOCPUS:
     type: number
     required: false
     minimum: 1
@@ -181,13 +314,19 @@ variables:
       and:
         - or:
           - eq:
-            - instance_shape 
+            - Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - instance_shape 
+            - Shape 
             - "VM.Standard.E4.Flex"
+          - eq:
+            - Shape 
+            - "VM.Standard.A3.Flex"
+          - eq:
+            - Shape 
+            - "VM.Optimized3.Flex"
 
-  instance_shape_flex_memory:
+  FlexShapeMemory:
     type: number
     required: false
     minimum: 1
@@ -200,11 +339,137 @@ variables:
       and:
         - or:
           - eq:
-            - instance_shape 
+            - Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - instance_shape
+            - Shape
             - "VM.Standard.E4.Flex"
+          - eq:
+            - Shape 
+            - "VM.Standard.A3.Flex"
+          - eq:
+            - Shape 
+            - "VM.Optimized3.Flex"
+
+  BastionShape:
+    type: oci:core:instanceshape:name
+    required: false
+    visible: true
+    default: "VM.Standard.E3.Flex"
+    title: "Bastion VM Shape"
+    description: "Choose Bastion Shape"
+    dependsOn:
+      compartmentId: ${compartment_ocid}
+
+  BastionFlexShapeOCPUS:
+    type: number
+    required: false
+    minimum: 1
+    maximum: 128
+    multipleOf: 1
+    default: 1
+    title: "Bastion Flex Shape OCPUs"
+    description: "Choose number of OCPUs for Flex Shape."
+    visible:
+      and:
+        - or:
+          - eq:
+            - BastionShape 
+            - "VM.Standard.E3.Flex"
+          - eq:
+            - BastionShape 
+            - "VM.Standard.E4.Flex"
+          - eq:
+            - BastionShape 
+            - "VM.Standard.A3.Flex"
+          - eq:
+            - BastionShape 
+            - "VM.Optimized3.Flex"
+
+  BastionFlexShapeMemory:
+    type: number
+    required: false
+    minimum: 1
+    maximum: 128
+    multipleOf: 1
+    default: 1
+    title: "Bastion Flex Shape Memory (GB)"
+    description: "Choose number GB for Flex Shape Memory."
+    visible:
+      and:
+        - or:
+          - eq:
+            - BastionShape 
+            - "VM.Standard.E3.Flex"
+          - eq:
+            - BastionShape
+            - "VM.Standard.E4.Flex"
+          - eq:
+            - BastionShape 
+            - "VM.Standard.A3.Flex"
+          - eq:
+            - BastionShape 
+            - "VM.Optimized3.Flex"
+
+  DSNotebookShape:
+    type: oci:core:instanceshape:name
+    required: false
+    visible: true
+    default: "VM.Standard.E3.Flex"
+    title: "DataScience Notebook Shape"
+    description: "Choose DataScience Notebook Shape"
+    dependsOn:
+      compartmentId: ${compartment_ocid}
+
+  DSNotebookFlexShapeOCPUS:
+    type: number
+    required: false
+    minimum: 1
+    maximum: 128
+    multipleOf: 1
+    default: 1
+    title: "DataScience Notebook Flex Shape OCPUs"
+    description: "Choose number of OCPUs for Flex Shape."
+    visible:
+      and:
+        - or:
+          - eq:
+            - DSNotebookShape 
+            - "VM.Standard.E3.Flex"
+          - eq:
+            - DSNotebookShape 
+            - "VM.Standard.E4.Flex"
+          - eq:
+            - DSNotebookShape 
+            - "VM.Standard.A3.Flex"
+          - eq:
+            - DSNotebookShape 
+            - "VM.Optimized3.Flex"
+
+  DSNotebookFlexShapeMemory:
+    type: number
+    required: false
+    minimum: 1
+    maximum: 128
+    multipleOf: 1
+    default: 10
+    title: "DataScience Notebook Flex Shape Memory (GB)"
+    description: "Choose number GB for Flex Shape Memory."
+    visible:
+      and:
+        - or:
+          - eq:
+            - DSNotebookShape 
+            - "VM.Standard.E3.Flex"
+          - eq:
+            - DSNotebookShape
+            - "VM.Standard.E4.Flex"
+          - eq:
+            - DSNotebookShape 
+            - "VM.Standard.A3.Flex"
+          - eq:
+            - DSNotebookShape 
+            - "VM.Optimized3.Flex"
 
   instance_os:
     type: enum
@@ -248,7 +513,7 @@ variables:
 
   autonomous_database_display_name:
     type: string
-    default: "My ATP DB"
+    default: "DataScienceADW"
     visible: true
     required: false
     title: "ADW database display name"
@@ -310,14 +575,6 @@ variables:
     enum:
       - "NOT_REGISTERED"
 
-  autonomous_database_whitelisted_ips:
-    type: string
-    default: "[\"\"]"
-    visible: true
-    required: false
-    title: "ADW database whitelisted IPs"
-    description: "Autonomous Data Warehouse (ADW) whitelisted IPs."
-
   catalog_display_name:
     type: string
     default: "My_Data_Catalog"
@@ -378,7 +635,7 @@ variables:
 
   project_display_name:
     type: string
-    default: "MyDataScienceProject"
+    default: "DataScienceProject"
     visible: true
     required: false
     title: "OCI DataScience Project Display Name"
@@ -386,7 +643,7 @@ variables:
 
   notebook_session_display_name:
     type: string
-    default: "MyDataScienceNotebookSession"
+    default: "DataScienceNotebookSession"
     visible: true
     required: false
     title: "OCI DataScience Notebook Session Display Name"

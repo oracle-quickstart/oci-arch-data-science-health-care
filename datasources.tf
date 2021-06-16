@@ -1,6 +1,11 @@
 ## Copyright © 2020, Oracle and/or its affiliates. 
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
+# Get list of availability domains
+data "oci_identity_availability_domains" "ADs" {
+  compartment_id = var.tenancy_ocid
+}
+
 data "oci_objectstorage_namespace" "ns" {
   compartment_id = var.compartment_ocid
 }
@@ -10,26 +15,17 @@ data "oci_objectstorage_namespace_metadata" "namespace-metadata1" {
 }
 
 
-data "oci_core_vnic_attachments" "datas_instance1_vnic1_attach" {
-  availability_domain = var.availablity_domain_name
+data "oci_core_vnic_attachments" "datas_instance_vnic1_attach" {
+  count               = var.NumberOfAppVMs
+  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[0]["name"] : var.availablity_domain_name
   compartment_id      = var.compartment_ocid
-  instance_id         = oci_core_instance.datas_instance1.id
+  instance_id         = oci_core_instance.datas_instance[count.index].id
 }
 
-data "oci_core_vnic" "datas_instance1_vnic1" {
-  vnic_id = data.oci_core_vnic_attachments.datas_instance1_vnic1_attach.vnic_attachments.0.vnic_id
+data "oci_core_vnic" "datas_instance_vnic" {
+  count   = var.NumberOfAppVMs
+  vnic_id = data.oci_core_vnic_attachments.datas_instance_vnic1_attach[count.index].vnic_attachments.0.vnic_id
 }
-
-data "oci_core_vnic_attachments" "datas_instance2_vnic1_attach" {
-  availability_domain = var.availablity_domain_name
-  compartment_id      = var.compartment_ocid
-  instance_id         = oci_core_instance.datas_instance1.id
-}
-
-data "oci_core_vnic" "datas_instance2_vnic1" {
-  vnic_id = data.oci_core_vnic_attachments.datas_instance2_vnic1_attach.vnic_attachments.0.vnic_id
-}
-
 
 # Get the latest Oracle Linux image
 data "oci_core_images" "InstanceImageOCID" {
